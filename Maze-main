@@ -1,0 +1,226 @@
+import queue
+import collections
+class Node:
+    id = None  # Unique value for each node.
+    up = None  # Represents value of neighbors (up, down, left, right).
+    down = None
+    left = None
+    right = None
+    previousNode = None  # Represents value of neighbors.
+    edgeCost = None  # Represents the cost on the edge from any parent to this node.
+    gOfN = None  # Represents the total edge cost
+    hOfN = None  # Represents the heuristic value
+    heuristicFn = None  # Represents the value of heuristic function   nodes = [[Node() for j in range(cols)] for i in range(rows)]
+
+    def __init__(self, value):
+        self.value = value
+    def getNode(self):
+        return self.value
+    def getid(self):
+        return self.id
+    def direction(self):
+        dir=[self.right,self.left,self.up,self.down]
+        return dir
+    def checkvalue(self,open,closed):
+        for r in range(len(open)):
+            if self.getid() == open[r]:
+                return False
+        for r in range(len(closed)):
+            if self.getid() == closed[r]:
+                return False
+        return True
+
+
+class mazeboard:
+    mazeStr=""
+    def __init__(self, Str):
+        self.Str = Str
+#s,.,.,
+    #return mazelist
+    def Stringtolist(self,Str):
+        mazelist = []
+        mazelist[:] = Str
+        n = len(mazelist)
+        while(',' in mazelist):
+            mazelist.remove(',')
+        return mazelist
+
+    #return 2d list
+    def Maze2DList(self,mazelist):
+        size = len(mazelist)
+        mazelist2d = []
+        temp = []
+        for i in range(size):
+            if mazelist[i] != ' ':
+                x= Node(mazelist[i])
+                temp.append(x)
+            else:
+                mazelist2d.append(temp)
+                temp =[]
+            if i+1 == size:
+                mazelist2d.append(temp)
+        return mazelist2d
+
+    # link nodes together in 2dlist
+    def maze2dNodes(self, list):
+        R = 0
+        counterid=-1
+        for i in list:
+            C = 0
+            for j in i:
+                if C - 1 > 0:
+                    j.left = list[R][C - 1]
+                if C + 1 < len(i):
+                    j.right = list[R][C + 1]
+                if R - 1 > 0:
+                    j.up = list[R - 1][C]
+                if R + 1 < len(list):
+                    j.down = list[R + 1][C]
+                C += 1
+                j.id = counterid + 1
+                counterid=counterid+1
+            R += 1
+        return list
+
+    def callmethod(self):
+        x= self.Stringtolist(self.Str)
+        x=self.Maze2DList(x)
+        x=self.maze2dNodes(x)
+        return x
+
+
+class SearchAlgorithms:
+    path = []  # Represents the correct path from start node to the goal node.
+    fullPath = []  # Represents all visited nodes from the start node to the goal node.
+
+    # totalCost = -1  # Represents the total cost in case using AStar (Euclidean), edgeCost=None
+
+    def __init__(self, mazeStr):
+        self.mazeStr = mazeStr
+
+
+    def DFS(self):
+        goal = 31
+        x = mazeboard(self.mazeStr)
+        z = x.callmethod()
+        closed = []
+        open = [(z[0][0]).getid()]
+        openx = [(z[0][0])]
+        while open[0]!= goal:
+            # to print open
+            # print(open)
+            if (len(open) == 0):
+                return "fail"
+
+            currnode = openx[0]
+            dir = [currnode.right, currnode.left, currnode.up, currnode.down]
+            for i in range(len(dir)):
+
+                if (dir[i] != None and dir[i].value != '#'):
+                    if dir[i].checkvalue(open, closed) == True:
+                        open.insert(1, dir[i].getid())
+                        openx.insert(1, dir[i])
+                        dir[i].previousNode = currnode
+
+            closed.append(open[0])
+            open.pop(0)
+            openx.pop(0)
+        x = openx[0]
+        while x != None:
+            self.path.append(x.getid())
+            x = x.previousNode
+            # end while'''
+        closed.append(goal)
+        self.fullPath = closed
+        self.path.reverse()
+        # Fill the correct path in self.path
+        # self.fullPath should contain the order of visited nodes
+        return self.path, self.fullPath
+
+    def BFS(self):
+        self.path=[]
+        self.fullPath=[]
+        goal=31
+        x = mazeboard(self.mazeStr)
+        z = x.callmethod()
+        closed=[]
+        open=[(z[0][0]).getid()]
+        openx = [(z[0][0])]
+        while open[0] !=goal:
+            # to print open
+           # print(open)
+            if (len(open) == 0):
+                return "fail"
+
+            currnode = openx[0]
+            dir = [currnode.right, currnode.left, currnode.up, currnode.down]
+            for i in range(len(dir)):
+
+                if(dir[i] !=None and dir[i].value !='#' ):
+                   if dir[i].checkvalue(open,closed) == True :
+                    open.append(dir[i].getid())
+                    openx.append(dir[i])
+                    dir[i].previousNode = currnode
+
+
+
+            closed.append(open[0])
+            open.pop(0)
+            node1 = openx.pop(0)
+
+        x=openx[0]
+        while x != None:
+            self.path.append(x.getid())
+            x = x.previousNode
+            #end while
+        closed.append(goal)
+        self.fullPath=closed
+        self.path.reverse()
+        # Fill the correct path in self.path
+        # self.fullPath should contain the order of visited nodes
+        return self.path, self.fullPath
+
+    def AStarEuclideanHeuristic(self):
+        # Cost for a step is calculated based on edge cost of node
+        # and use Euclidean Heuristic for evaluating the heuristic value
+        # Fill the correct path in self.path
+        # self.fullPath should contain the order of visited nodes
+        return self.path, self.fullPath, self.totalCost
+
+
+
+def main():
+     searchAlgo = SearchAlgorithms('S,.,.,#,.,.,. .,#,.,.,.,#,. .,#,.,.,.,.,. .,.,#,#,.,.,. #,.,#,E,.,#,.')
+     path, fullPath = searchAlgo.DFS()
+     print('*DFS*\nPath is: ' + str(path) + '\nFull Path is: ' + str(fullPath) + '\n\n')
+
+    #######################################################################################
+
+     searchAlgo = SearchAlgorithms('S,.,.,#,.,.,. .,#,.,.,.,#,. .,#,.,.,.,.,. .,.,#,#,.,.,. #,.,#,E,.,#,.')
+     path, fullPath = searchAlgo.BFS()
+     print('*BFS*\nPath is: ' + str(path) + '\nFull Path is: ' + str(fullPath) + '\n\n')
+    #######################################################################################
+
+    # searchAlgo = SearchAlgorithms('S,.,.,#,.,.,. .,#,.,.,.,#,. .,#,.,.,.,.,. .,.,#,#,.,.,. #,.,#,E,.,#,.', [0, 15, 2, 100, 60, 35, 30, 3 , 100, 2, 15, 60, 100, 30, 2 , 100, 2, 2, 2, 40, 30, 2, 2, 100, 100, 3, 15, 30, 100, 2 , 100, 0, 2, 100, 30])
+    # path, fullPath, TotalCost = searchAlgo.AStarEuclideanHeuristic()
+    # print('*ASTAR with Euclidean Heuristic *\nPath is: ' + str(path) + '\nFull Path is: ' + str(
+    # fullPath) + '\nTotal Cost: ' + str(TotalCost) + '\n\n')
+
+    #######################################################################################
+    #maze
+main()
+Str = 'S,.,.,#,.,.,. .,#,.,.,.,#,. .,#,.,.,.,.,. .,.,#,#,.,.,., #,.,#,E,.,#,.'
+
+x= mazeboard(Str)
+z=x.callmethod()
+print("maze board nodes: ")
+for r in range(len(z)):
+    for c in range(len(z[0])):
+        print(z[r][c].getNode(), end=" ")
+    print()
+
+print("maze board IDs: ")
+for r in range(len(z)):
+    for c in range(len(z[0])):
+        print(z[r][c].getid(), end=" ")
+    print()
